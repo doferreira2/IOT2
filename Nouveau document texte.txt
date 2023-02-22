@@ -1,0 +1,4 @@
+
+.\mosquitto_sub -h 198.27.70.149 -t 'doco/doco/' -p 443
+
+.\mosquitto_pub -h 198.27.70.149 -t 'doco/doco/' -m "{'test' : 20}" -q 2  -p 443
