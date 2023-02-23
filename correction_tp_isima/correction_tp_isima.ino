@@ -223,6 +223,7 @@ void setupCredentials() {
   
 }
 
+//chiffrement AES : key + plaintext => aes_Key
 byte key[16]={0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 byte plaintext[16]={0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
 byte aes_Key[16];
@@ -261,6 +262,8 @@ void setup() {
   modem.setPort(1);
   modem.dataRate(3);
 
+  //Utilisation du chiffrement AES128 pour avoir la nouvelle clé aes_key 
+  //Cette clé sera utilisé par la suite
   aes128.setKey(key,16);
   aes128.encryptBlock(aes_Key,plaintext);
 
@@ -279,17 +282,22 @@ void loop() {
   static byte crypData[1] = {0};
 
   if ( (millis() - lastEmit) > EMIT_RATE ) {
+    //Au lieu d'afficher la température, on affiche un int qu'on incrémente
     frame[0] = (byte)cpt++;
+    //La donnée frame[0] devient chiffrée aprés un XOR entre la donnée initiale et l'aes_key
     crypData[0] = frame[0] ^ aes_Key[0];
+   
     modem.beginPacket();
     modem.write((uint8_t *)crypData,1);
     modem.endPacket(false);
     lastEmit = millis();
+    
+    //On print les données pour du débug 
     Serial.print("AESKey :");
     Serial.println(aes_Key[0]);
-    Serial.print("init :");
+    Serial.print("Donnee init :");
     Serial.println(frame[0]);
-    Serial.print("crypt :");
+    Serial.print("Donnee crypt :");
     Serial.println(crypData[0]);
   }
 
